@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Food Menu</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #fffaf5;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 28px;
+            border-radius: 18px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        h2 {
+            margin: 0;
+            color: #111827;
+            font-size: 32px;
+        }
+        .nav-btn {
+            display: inline-block;
+            text-decoration: none;
+            background: #991b1b;
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .nav-btn.green {
+            background: #065f46;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 12px 14px;
+            text-align: left;
+        }
+        th {
+            background: #fff1f2;
+            color: #374151;
+        }
+        tr:nth-child(even) {
+            background: #fff7ed;
+        }
+        .status {
+            font-weight: bold;
+            padding: 6px 10px;
+            border-radius: 999px;
+            display: inline-block;
+        }
+        .available {
+            color: #166534;
+            background: #dcfce7;
+        }
+        .not-available {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+        .delete-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .edit-btn, .availability-btn {
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            margin: 2px;
+        }
+        .edit-btn { background: #2563eb; }
+        .availability-btn { background: #0f766e; }
+        .empty {
+            padding: 25px;
+            text-align: center;
+            color: #6b7280;
+        }
+        .detail-line { color: #6b7280; font-size: 12px; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="topbar">
+            <h2>Owner Food Management</h2>
+            <div>
+                <a class="nav-btn green" th:href="@{/food-form}">+ Add Dish</a>
+                <a class="nav-btn" th:href="@{/menu}">Public Menu</a>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Image</th>
+                <th>Dish Name</th>
+                <th>Category & details</th>
+                <th>Price</th>
+                <th>Type / Rating</th>
+                <th>Prep</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="food : ${foods}">
+                <td>
+                    <img th:if="${food.imageUrl != null and !#strings.isEmpty(food.imageUrl)}" th:src="${food.imageUrl}" th:alt="${food.foodName}" width="80" height="60" style="border-radius:8px; object-fit:cover;">
+                    <div th:unless="${food.imageUrl != null and !#strings.isEmpty(food.imageUrl)}" style="width:80px;height:60px;border-radius:8px;background:#f5d0a9;display:flex;align-items:center;justify-content:center;font-size:28px;">🍽️</div>
+                </td>
+                <td th:text="${food.foodName}">Dish</td>
+                <td>
+                    <strong th:text="${food.category != null ? food.category : 'Uncategorized'}">Category</strong>
+                    <div class="detail-line" th:text="${food.description != null ? food.description : 'No description'}">No description</div>
+                </td>
+                <td th:text="'₹' + ${food.price}">₹0</td>
+                <td>
+                    <span th:text="${food.vegetarian != null and food.vegetarian ? 'Vegetarian' : 'Non-vegetarian'}">Vegetarian</span>
+                    <div class="detail-line" th:text="${food.rating != null ? '★ ' + food.rating : 'Not rated'}">Not rated</div>
+                </td>
+                <td th:text="${food.preparationMinutes != null ? food.preparationMinutes + ' min' : '-'}">-</td>
+                <td>
+                    <span th:if="${food.isAvailable}" class="status available">Available</span>
+                    <span th:unless="${food.isAvailable}" class="status not-available">Out of Stock</span>
+                </td>
+                <td>
+                    <a class="edit-btn" th:href="@{/food/edit/{id}(id=${food.id})}">Edit</a>
+                    <form th:action="@{/food/toggle/{id}(id=${food.id})}" method="post" style="display:inline;">
+                        <button class="availability-btn" type="submit" th:text="${food.isAvailable ? 'Mark Unavailable' : 'Mark Available'}">Mark Available</button>
+                    </form>
+                    <form th:action="@{/food/delete/{id}(id=${food.id})}" method="post">
+                        <button class="delete-btn" type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(foods)}">
+                <td colspan="8" class="empty">No food items available yet. Add your first Indian dish.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

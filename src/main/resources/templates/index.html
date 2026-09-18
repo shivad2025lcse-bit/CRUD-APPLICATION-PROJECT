@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SpiceNest | Indian Food Menu</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #fff7ed, #fffaf5, #fef2f2);
+            color: #1f2937;
+        }
+        .hero {
+            padding: 60px 20px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #7c2d12, #991b1b);
+            color: #fff;
+        }
+        .hero h1 {
+            margin: 0 0 12px;
+            font-size: 42px;
+        }
+        .hero p {
+            margin: 0 auto 24px;
+            max-width: 700px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #fff;
+            background: #111827;
+            padding: 12px 22px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .btn.primary {
+            background: #16a34a;
+        }
+        .btn.accent { background: #f97316; }
+        .container {
+            max-width: 1150px;
+            margin: 30px auto;
+            padding: 0 20px 50px;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 25px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+        }
+        .card {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+        .card-image {
+            height: 150px;
+            width: 100%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #fde68a, #fdba74);
+        }
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .card-body {
+            padding: 18px;
+        }
+        .card h3 {
+            margin: 0 0 8px;
+            font-size: 22px;
+        }
+        .price {
+            color: #16a34a;
+            font-weight: bold;
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        .meta {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+        .market-bar {
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) 180px 150px auto;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .market-bar input, .market-bar select, .checkout input {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+            background: #fff;
+        }
+        .cart-button {
+            border: 0;
+            border-radius: 10px;
+            background: #111827;
+            color: white;
+            font-weight: bold;
+            padding: 0 18px;
+            cursor: pointer;
+        }
+        .dish-topline {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+        .rating { color: #b45309; font-weight: bold; }
+        .food-type { color: #15803d; font-weight: bold; }
+        .food-type.nonveg { color: #b91c1c; }
+        .order-button {
+            width: 100%;
+            border: 0;
+            border-radius: 9px;
+            padding: 11px;
+            background: #f97316;
+            color: #431407;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 14px;
+        }
+        .unavailable { opacity: .58; }
+        .drawer {
+            position: fixed;
+            inset: 0 0 0 auto;
+            width: min(390px, 100%);
+            background: #fff;
+            z-index: 5;
+            box-shadow: -12px 0 30px rgba(0,0,0,.16);
+            padding: 24px;
+            transform: translateX(105%);
+            transition: transform .25s ease;
+            overflow-y: auto;
+        }
+        .drawer.open { transform: translateX(0); }
+        .drawer-header { display:flex; justify-content:space-between; align-items:center; }
+        .close-button { border:0; background:transparent; font-size:24px; cursor:pointer; }
+        .cart-line { display:flex; justify-content:space-between; gap:12px; padding:14px 0; border-bottom:1px solid #eee; }
+        .cart-line small { color:#6b7280; display:block; margin-top:4px; }
+        .quantity { display:flex; align-items:center; gap:8px; }
+        .quantity button { border:1px solid #ddd; background:#fff; border-radius:6px; cursor:pointer; width:26px; height:26px; }
+        .checkout { display:grid; gap:10px; margin-top:20px; }
+        .checkout button { border:0; background:#15803d; color:#fff; padding:13px; border-radius:10px; font-weight:bold; cursor:pointer; }
+        .total { display:flex; justify-content:space-between; font-size:18px; font-weight:bold; margin-top:18px; }
+        @media (max-width: 760px) {
+            .market-bar { grid-template-columns: 1fr 1fr; }
+            .cart-button { min-height: 44px; }
+            .hero h1 { font-size: 34px; }
+        }
+        .empty-state {
+            text-align: center;
+            color: #6b7280;
+            padding: 30px;
+            font-size: 18px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>SpiceNest Indian Food App</h1>
+        <p>Fresh Indian flavors, rich spices, and delicious ready-to-order meals for every craving.</p>
+        <div class="actions">
+            <a th:href="@{/menu}" class="btn primary">View Menu</a>
+            <a th:href="@{/owner}" class="btn">Owner View</a>
+            <button class="btn accent" type="button" onclick="openCart()">Cart <span id="heroCartCount">0</span></button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">Popular Indian Varieties</h2>
+        <div style="text-align:center;color:#6b7280;margin:-12px 0 25px;"
+             th:text="'Current menu count: ' + ${#lists.size(foods)} + ' dishes'">
+            Current menu count: 0 dishes
+        </div>
+
+        <div class="market-bar">
+            <input id="searchInput" type="search" placeholder="Search dishes, categories..." aria-label="Search dishes">
+            <select id="categoryFilter" aria-label="Filter by category">
+                <option value="">All categories</option>
+                <option value="North Indian">North Indian</option>
+                <option value="South Indian">South Indian</option>
+                <option value="Biryani">Biryani</option>
+                <option value="Street Food">Street Food</option>
+                <option value="Breads">Breads</option>
+                <option value="Desserts">Desserts</option>
+                <option value="Beverages">Beverages</option>
+            </select>
+            <select id="dietFilter" aria-label="Filter by food type">
+                <option value="">All food types</option>
+                <option value="veg">Vegetarian</option>
+                <option value="nonveg">Non-vegetarian</option>
+            </select>
+            <button class="cart-button" type="button" onclick="openCart()">View cart (<span id="cartCount">0</span>)</button>
+        </div>
+
+        <div th:if="${#lists.isEmpty(foods)}" class="empty-state">
+            No dishes added yet. Add your first Indian food variety from the form.
+        </div>
+
+        <div class="grid" th:unless="${#lists.isEmpty(foods)}">
+              <div class="card food-card"
+                  th:each="food : ${foods}"
+                  th:classappend="${!food.isAvailable ? ' unavailable' : ''}"
+                  th:data-name="${food.foodName}"
+                  th:data-category="${food.category}"
+                  th:data-vegetarian="${food.vegetarian}">
+                <div class="card-image">
+                    <img th:if="${food.imageUrl != null and !#strings.isEmpty(food.imageUrl)}" th:src="${food.imageUrl}" th:alt="${food.foodName}" />
+                    <div th:unless="${food.imageUrl != null and !#strings.isEmpty(food.imageUrl)}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;">🍽️</div>
+                </div>
+                <div class="card-body">
+                    <div class="dish-topline">
+                        <span th:text="${food.category != null ? food.category : 'Indian special'}">Indian special</span>
+                        <span class="rating" th:text="${food.rating != null ? '★ ' + food.rating : 'New'}">New</span>
+                    </div>
+                    <h3 th:text="${food.foodName}">Dish Name</h3>
+                    <div class="price" th:text="'₹' + ${food.price}">₹0</div>
+                    <div class="meta" th:text="${food.description != null ? food.description : 'Freshly prepared with authentic Indian flavours.'}">Authentic Indian taste.</div>
+                    <div class="dish-topline" style="margin-top:10px;">
+                        <span th:text="${food.preparationMinutes != null ? food.preparationMinutes + ' min' : 'Quick delivery'}">Quick delivery</span>
+                        <span class="food-type" th:classappend="${food.vegetarian != null and !food.vegetarian ? ' nonveg' : ''}" th:text="${food.vegetarian != null and food.vegetarian ? 'VEG' : 'NON-VEG'}">VEG</span>
+                    </div>
+                    <button class="order-button" type="button"
+                            th:if="${food.isAvailable}"
+                            th:data-id="${food.id}"
+                            th:data-food-name="${food.foodName}"
+                            th:data-price="${food.price}"
+                            onclick="addToCart(this)">Add to cart</button>
+                    <button class="order-button" type="button" disabled th:unless="${food.isAvailable}">Currently unavailable</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aside id="cartDrawer" class="drawer" aria-label="Shopping cart">
+        <div class="drawer-header">
+            <h2>Your cart</h2>
+            <button class="close-button" type="button" onclick="closeCart()" aria-label="Close cart">&times;</button>
+        </div>
+        <div id="cartItems"><p class="meta">Your cart is empty. Add something delicious.</p></div>
+        <div class="total"><span>Total</span><span id="cartTotal">₹0</span></div>
+        <form class="checkout" onsubmit="placeOrder(event)">
+            <label for="customerName">Name</label>
+            <input id="customerName" type="text" placeholder="Your name" required>
+            <label for="customerPhone">Phone</label>
+            <input id="customerPhone" type="tel" placeholder="Phone number" required>
+            <label for="customerAddress">Delivery address</label>
+            <input id="customerAddress" type="text" placeholder="Delivery address" required>
+            <button type="submit">Place order</button>
+        </form>
+        <p id="orderMessage" class="meta"></p>
+    </aside>
+
+    <script>
+        const cart = JSON.parse(localStorage.getItem('spicenest-cart') || '[]');
+
+        function saveCart() {
+            localStorage.setItem('spicenest-cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        function addToCart(button) {
+            const id = button.dataset.id;
+            const item = cart.find(entry => entry.id === id);
+            if (item) item.quantity += 1;
+            else cart.push({ id, name: button.dataset.foodName, price: Number(button.dataset.price), quantity: 1 });
+            saveCart();
+            openCart();
+        }
+
+        function changeQuantity(id, amount) {
+            const item = cart.find(entry => entry.id === id);
+            if (!item) return;
+            item.quantity += amount;
+            if (item.quantity <= 0) cart.splice(cart.indexOf(item), 1);
+            saveCart();
+        }
+
+        function renderCart() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            document.querySelectorAll('#cartCount, #heroCartCount').forEach(node => node.textContent = count);
+            document.getElementById('cartTotal').textContent = '₹' + total.toFixed(2);
+            document.getElementById('cartItems').innerHTML = cart.length ? cart.map(item => `
+                <div class="cart-line"><div><strong>${item.name}</strong><small>₹${item.price.toFixed(2)} each</small></div>
+                <div class="quantity"><button type="button" onclick="changeQuantity('${item.id}', -1)">-</button><span>${item.quantity}</span><button type="button" onclick="changeQuantity('${item.id}', 1)">+</button></div></div>`).join('') : '<p class="meta">Your cart is empty. Add something delicious.</p>';
+        }
+
+        function openCart() { document.getElementById('cartDrawer').classList.add('open'); }
+        function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); }
+        function placeOrder(event) {
+            event.preventDefault();
+            if (!cart.length) return;
+            document.getElementById('orderMessage').textContent = 'Order received! We will contact you shortly for confirmation.';
+            cart.splice(0, cart.length);
+            saveCart();
+            event.target.reset();
+        }
+
+        function filterCards() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value.toLowerCase();
+            const diet = document.getElementById('dietFilter').value;
+            document.querySelectorAll('.food-card').forEach(card => {
+                const matchesText = (card.dataset.name + ' ' + card.dataset.category).toLowerCase().includes(query);
+                const matchesCategory = !category || card.dataset.category.toLowerCase() === category;
+                const matchesDiet = !diet || (diet === 'veg' ? card.dataset.vegetarian === 'true' : card.dataset.vegetarian !== 'true');
+                card.style.display = matchesText && matchesCategory && matchesDiet ? '' : 'none';
+            });
+        }
+
+        document.querySelectorAll('#searchInput, #categoryFilter, #dietFilter').forEach(input => input.addEventListener('input', filterCards));
+        renderCart();
+    </script>
+</body>
+</html>
